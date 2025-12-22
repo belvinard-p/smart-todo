@@ -1,0 +1,46 @@
+package com.belvi.todolist.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.Instant;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "todos")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Todo {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String title;
+
+    private String description;
+
+    private boolean completed = false;
+
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
+
+    private LocalDate dueDate;
+
+    private LocalDate createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDate.now();
+    }
+
+    public enum Priority {
+        LOW, MEDIUM, HIGH
+    }
+}

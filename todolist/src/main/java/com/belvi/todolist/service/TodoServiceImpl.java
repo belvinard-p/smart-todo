@@ -2,11 +2,14 @@ package com.belvi.todolist.service;
 
 import com.belvi.todolist.dto.TodoRequest;
 import com.belvi.todolist.dto.TodoResponse;
+import com.belvi.todolist.exception.ResourceNotFoundException;
 import com.belvi.todolist.mapper.TodoMapper;
 import com.belvi.todolist.model.Todo;
 import com.belvi.todolist.repository.TodoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,17 +20,18 @@ import java.util.List;
 @Transactional
 public class TodoServiceImpl implements TodoService {
 
-    private final TodoRepository repository;
-    private final TodoMapper mapper;
+    public final TodoRepository repository;
+    public final TodoMapper mapper;
 
     @Override
     public TodoResponse create(TodoRequest request) {
-        System.out.println("Request title: " + request.getTitle());
         if (repository.existsByTitle(request.getTitle())) {
-            throw new IllegalArgumentException("Todo with title '" + request.getTitle() + "' already exists");
+            throw new IllegalArgumentException(
+                    "Todo with title '" + request.getTitle() + "' already exists"
+            );
         }
+
         Todo todo = mapper.toEntity(request);
-        System.out.println("Todo title after mapping: " + todo.getTitle());
         todo.setCompleted(false); // règle métier
         Todo saved = repository.save(todo);
         return mapper.toResponse(saved);
@@ -35,24 +39,20 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TodoResponse> findAll() {
-        return mapper.toResponseList(repository.findAll());
-    }
-
-    @Override
-    public void delete(Long id) {
-        repository.deleteById(id);
+    public Page<TodoResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
     public TodoResponse update(Long id, TodoRequest request) {
-        Todo todo = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Todo not found with id " + id
-                ));
+        Todo todo = findTodoOrThrow(id);
 
-        if (!todo.getTitle().equals(request.getTitle()) && repository.existsByTitle(request.getTitle())) {
-            throw new IllegalArgumentException("Todo with title '" + request.getTitle() + "' already exists");
+        if (!todo.getTitle().equals(request.getTitle())
+                && repository.existsByTitle(request.getTitle())) {
+            throw new IllegalArgumentException(
+                    "Todo with title '" + request.getTitle() + "' already exists"
+            );
         }
 
         mapper.updateEntityFromRequest(request, todo);
@@ -61,4 +61,23 @@ public class TodoServiceImpl implements TodoService {
         return mapper.toResponse(updated);
     }
 
+    @Override
+    public TodoResponse toggle(Long id) {
+        Todo todo = findTodoOrThrow(id);
+        todo.setCompleted(!todo.isCompleted());
+        Todo updated = repository.save(todo);
+        return mapper.toResponse(updated);
+    }
+
+    @Override
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+
+    private Todo findTodoOrThrow(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Todo not found with id " + id)
+                );
+    }
 }

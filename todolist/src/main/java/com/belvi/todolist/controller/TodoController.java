@@ -34,7 +34,7 @@ public class TodoController {
     @GetMapping
     public ResponseEntity<Page<TodoResponse>> findAll(
             @Parameter(description = "Pagination parameters. Valid sort properties: id, title, description, completed, priority, dueDate, createdAt", 
-                      example = "{\"page\": 0, \"size\": 10, \"sort\": [\"id\"]}")
+                      example = "{\"page\": 0, \"size\": 10, \"sort\": [\"title\"]}")
             @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
         return ResponseEntity.ok(service.findAll(pageable));

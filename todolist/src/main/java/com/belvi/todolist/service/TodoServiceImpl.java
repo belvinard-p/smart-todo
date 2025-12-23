@@ -48,6 +48,10 @@ public class TodoServiceImpl implements TodoService {
     public TodoResponse update(Long id, TodoRequest request) {
         Todo todo = findTodoOrThrow(id);
 
+        if (todo.isCompleted()) {
+            throw new IllegalArgumentException("Cannot update a completed todo");
+        }
+
         if (!todo.getTitle().equals(request.getTitle())
                 && repository.existsByTitle(request.getTitle())) {
             throw new IllegalArgumentException(

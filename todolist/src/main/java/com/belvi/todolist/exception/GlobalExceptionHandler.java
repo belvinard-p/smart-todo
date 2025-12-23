@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,9 +50,17 @@ public class GlobalExceptionHandler {
                     "Invalid sort property: " + ex.getPropertyName()));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(
+            IllegalArgumentException ex
+    ) {
+        return ResponseEntity.badRequest()
+                .body(errorBody(HttpStatus.BAD_REQUEST, ex.getMessage()));
+    }
+
     private Map<String, Object> errorBody(HttpStatus status, String message) {
         return Map.of(
-                "timestamp", Instant.now(),
+                "timestamp", LocalDate.now(),
                 "status", status.value(),
                 "error", status.getReasonPhrase(),
                 "message", message

@@ -1,6 +1,7 @@
 package com.belvi.todolist.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,6 +32,7 @@ public class Todo {
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
+    @FutureOrPresent(message = "La date d'échéance ne peut pas être dans le passé")
     private LocalDate dueDate;
 
     private LocalDate createdAt;
@@ -40,7 +42,4 @@ public class Todo {
         createdAt = LocalDate.now();
     }
 
-    public enum Priority {
-        LOW, MEDIUM, HIGH
-    }
 }

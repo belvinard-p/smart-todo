@@ -1,5 +1,6 @@
 package com.belvi.todolist.dto;
 
+import com.belvi.todolist.model.Priority;
 import com.belvi.todolist.model.Todo;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
@@ -18,7 +19,7 @@ public class TodoRequest {
 
     private String description;
 
-    private Todo.Priority priority;
+    private Priority priority;
 
     @FutureOrPresent(message = "La date d'échéance ne peut pas être dans le passé")
     private LocalDate dueDate;

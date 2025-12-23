@@ -1,5 +1,6 @@
 package com.belvi.todolist.dto;
 
+import com.belvi.todolist.model.Priority;
 import com.belvi.todolist.model.Todo;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ public class TodoResponse {
     private String title;
     private String description;
     private boolean completed;
-    private Todo.Priority priority;
+    private Priority priority;
     private LocalDate dueDate;
     private LocalDate createdAt;
 }
